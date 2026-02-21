@@ -26,7 +26,7 @@ public class SelectionSteps {
 
     private String stepName;
 
-    private LocalDateTime stopDate;
+    private LocalDateTime stepDate;
 
     private String location;
 

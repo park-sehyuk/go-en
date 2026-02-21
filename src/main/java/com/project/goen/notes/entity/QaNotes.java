@@ -29,7 +29,7 @@ public class QaNotes {
     @Column(columnDefinition = "TEXT")
     private String answer;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private NoteType noteType;
 
 }

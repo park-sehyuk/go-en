@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
@@ -19,6 +20,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String password;
@@ -26,10 +28,10 @@ public class User {
     private String name;
 
 
-    public static User createUser(UserJoinDto dto){
+    public static User createUser(UserJoinDto dto, PasswordEncoder passwordEncoder){
         User user = new User();
         user.email = dto.getEmail();
-        user.password = dto.getPassword();
+        user.password = passwordEncoder.encode(dto.getPassword());
         user.name = dto.getName();
 
         return user;
