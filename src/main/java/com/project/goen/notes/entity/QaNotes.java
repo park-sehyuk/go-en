@@ -2,6 +2,9 @@ package com.project.goen.notes.entity;
 
 import com.project.goen.application.entity.Application;
 import com.project.goen.notes.constent.NoteType;
+import com.project.goen.notes.dto.QaNoteAddDto;
+import com.project.goen.notes.dto.QaNotesDto;
+import com.project.goen.notes.dto.QaNotesUpdateDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -31,5 +34,21 @@ public class QaNotes {
 
     @Enumerated(EnumType.STRING)
     private NoteType noteType;
+
+    public static QaNotes createQaNote(QaNoteAddDto dto, Application application){
+        QaNotes note = new QaNotes();
+        note.application = application;
+        note.question = dto.getQuestion();
+        note.answer = dto.getAnswer();
+        note.noteType = dto.getNoteType();
+
+        return note;
+    }
+
+    public void updateQaNote(QaNotesUpdateDto dto){
+        this.question = dto.getQuestion();
+        this.answer = dto.getAnswer();
+        this.noteType = dto.getNoteType();
+    }
 
 }

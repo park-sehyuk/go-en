@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 public class ApplicationServiceImpl implements ApplicationService{
 
     @Autowired
-    public UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    public ApplicationRepository applicationRepository;
+    private ApplicationRepository applicationRepository;
 
     @Override
     public Long addCard(ApplicationAddDto addDto, String email) {

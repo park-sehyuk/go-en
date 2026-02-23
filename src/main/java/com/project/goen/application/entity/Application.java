@@ -66,7 +66,9 @@ public class Application {
         this.companyName = dto.getCompanyName();
         this.position = dto.getPosition();
         this.status = dto.getStatus();
+        this.priority = dto.getPriority();
         this.deadline = dto.getDeadline();
+        this.url = dto.getUrl();
     }
 
 }

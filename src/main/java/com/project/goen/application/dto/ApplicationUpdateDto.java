@@ -12,5 +12,7 @@ public class ApplicationUpdateDto {
     private String companyName;
     private String position;
     private Status status;
+    private Long priority;
     private LocalDate deadline;
+    private String url;
 }
