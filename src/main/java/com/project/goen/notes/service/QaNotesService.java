@@ -10,8 +10,6 @@ public interface QaNotesService {
 
     Long addNote(QaNoteAddDto dto, Long appId);
 
-    List<QaNotesDto> getNoteList(Long appId);
-
     void updateNote(Long qaNoteId, QaNotesUpdateDto dto);
 
     void deleteNote(Long qaNoteId);

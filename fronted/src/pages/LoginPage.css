@@ -1,0 +1,68 @@
+/* src/styles/Login.css */
+.login-container {
+  max-width: 1920px;
+  width: 1470px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  margin-top: 120px;
+}
+
+.login-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 12px;
+  width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.login-logo {
+  color: #0052cc;
+  font-size: clamp(1.6rem, 2.6vw, 2.8rem);
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 20px;
+  text-decoration: none;
+  display: block;
+}
+
+.login-logo {
+  color: #0052cc;
+  font-size: clamp(1.6rem, 2.6vw, 2.8rem);
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 20px;
+  text-decoration: none;
+  display: block;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 1.2rem 1rem;
+  margin-bottom: 20px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.login-submit {
+  width: 100%;
+  padding: 1.2rem;
+  background-color: #0052cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.login-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}

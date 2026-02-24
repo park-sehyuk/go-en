@@ -1,12 +1,14 @@
 package com.project.goen.application.dto;
 
 import com.project.goen.application.constent.Status;
-import com.project.goen.notes.entity.QaNotes;
-import com.project.goen.selectionSteps.entity.SelectionSteps;
+import com.project.goen.application.entity.Application;
+import com.project.goen.notes.dto.QaNotesDto;
+import com.project.goen.selectionSteps.dto.SelectionStepDto;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -15,6 +17,25 @@ public class ApplicationDetailDto {
     private String companyName;
     private String position;
     private Status status;
-    private List<SelectionSteps> selectionSteps;
-    private List<QaNotes> qaNotes;
+    private List<SelectionStepDto> selectionSteps;
+    private List<QaNotesDto> qaNotes;
+
+    public ApplicationDetailDto(Application app){
+        this.id = app.getId();
+        this.companyName = app.getCompanyName();
+        this.position = app.getPosition();
+        this.status = app.getStatus();
+
+        if(app.getSelectionSteps() != null){
+            this.selectionSteps = app.getSelectionSteps().stream()
+                    .map(step -> new SelectionStepDto(step))
+                    .collect(Collectors.toList());
+        }
+
+        if (app.getQaNotes() != null){
+            this.qaNotes = app.getQaNotes().stream()
+                    .map(step -> new QaNotesDto(step))
+                    .collect(Collectors.toList());
+        }
+    }
 }

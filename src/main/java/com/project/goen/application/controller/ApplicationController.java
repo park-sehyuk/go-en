@@ -1,9 +1,6 @@
 package com.project.goen.application.controller;
 
-import com.project.goen.application.dto.ApplicationAddDto;
-import com.project.goen.application.dto.ApplicationCardDto;
-import com.project.goen.application.dto.ApplicationStatusUpdateDto;
-import com.project.goen.application.dto.ApplicationUpdateDto;
+import com.project.goen.application.dto.*;
 import com.project.goen.application.service.ApplicationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +30,14 @@ public class ApplicationController {
         List<ApplicationCardDto> appCardList = applicationService.getCardList(principal.getName());
 
         return ResponseEntity.ok(appCardList);
+    }
+
+    @GetMapping("/detail/{applicationId}")
+    public ResponseEntity getAppDetail(@PathVariable("applicationId") Long applicationId,
+                                       Principal principal){
+        ApplicationDetailDto appDetail = applicationService.getApplicationDetail(applicationId, principal.getName());
+
+        return ResponseEntity.ok(appDetail);
     }
 
     @PatchMapping("/cardStatus/{applicationId}")

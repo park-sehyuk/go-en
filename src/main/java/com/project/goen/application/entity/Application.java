@@ -5,6 +5,8 @@ import com.project.goen.application.dto.ApplicationAddDto;
 import com.project.goen.application.dto.ApplicationCardDto;
 import com.project.goen.application.dto.ApplicationStatusUpdateDto;
 import com.project.goen.application.dto.ApplicationUpdateDto;
+import com.project.goen.notes.entity.QaNotes;
+import com.project.goen.selectionSteps.entity.SelectionSteps;
 import com.project.goen.user.dto.UserLoginDto;
 import com.project.goen.user.entity.User;
 import jakarta.persistence.*;
@@ -12,6 +14,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -43,6 +47,12 @@ public class Application {
     private String url;
 
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SelectionSteps> selectionSteps = new ArrayList<>();
+
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QaNotes> qaNotes = new ArrayList<>();
 
     public static Application createApp(ApplicationAddDto dto, User user){
         Application app = new Application();

@@ -26,13 +26,6 @@ public class SelectionStepsController {
         return ResponseEntity.ok(stepId);
     }
 
-    @GetMapping("/{appId}")
-    public ResponseEntity getStep(@PathVariable("appId") Long appId){
-        List<SelectionStepDto> stepList = selectionStepsService.getStepList(appId);
-
-        return ResponseEntity.ok(stepList);
-    }
-
     @PatchMapping("/update/{stepId}")
     public ResponseEntity updateStep(@PathVariable("stepId") Long stepId,
                                      @Valid @RequestParam("stepUpdateDto")StepUpdateDto dto){

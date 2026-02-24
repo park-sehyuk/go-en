@@ -10,8 +10,6 @@ public interface SelectionStepsService {
 
     Long addStep(StepAddDto addDto, Long appId);
 
-    List<SelectionStepDto> getStepList(Long appId);
-
     void updateStep(Long stepId, StepUpdateDto dto);
 
     void deleteStep(Long stepId);

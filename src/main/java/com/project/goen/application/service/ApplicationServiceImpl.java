@@ -1,9 +1,6 @@
 package com.project.goen.application.service;
 
-import com.project.goen.application.dto.ApplicationAddDto;
-import com.project.goen.application.dto.ApplicationCardDto;
-import com.project.goen.application.dto.ApplicationStatusUpdateDto;
-import com.project.goen.application.dto.ApplicationUpdateDto;
+import com.project.goen.application.dto.*;
 import com.project.goen.application.entity.Application;
 import com.project.goen.application.repository.ApplicationRepository;
 import com.project.goen.user.entity.User;
@@ -48,6 +45,17 @@ public class ApplicationServiceImpl implements ApplicationService{
         List<Application> appList = applicationRepository.findAllByUserId(user.getId());
 
         return appList.stream().map(app -> new ApplicationCardDto(app)).collect(Collectors.toList());
+    }
+
+    @Override
+    public ApplicationDetailDto getApplicationDetail(Long appId, String email) {
+        Application app = applicationRepository.findById(appId)
+                .orElseThrow(() -> new EntityNotFoundException("상세 정보를 찾을 수 없습니다."));
+
+        if(!app.getUser().getEmail().equals(email))
+            throw new AccessDeniedException("조회 권한이 없습니다.");
+
+        return new ApplicationDetailDto(app);
     }
 
     @Override

@@ -27,12 +27,6 @@ public class QaNotesController {
         return ResponseEntity.ok(noteId);
     }
 
-    @GetMapping("/{appId}")
-    public ResponseEntity getNote(@PathVariable("appId") Long appId){
-        List<QaNotesDto> noteList = qaNotesService.getNoteList(appId);
-        return ResponseEntity.ok(noteList);
-    }
-
     @PatchMapping("/update/{noteId}")
     public ResponseEntity updateNote(@PathVariable("noteId") Long noteId,
                                      @Valid @RequestParam("qaNotesUpdateDto")QaNotesUpdateDto dto){

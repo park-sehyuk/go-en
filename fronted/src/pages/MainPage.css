@@ -1,0 +1,181 @@
+/* Kanban.css */
+/* 상단 툴바 (검색 + 필터 + 추가 버튼) */
+.kanban-container {
+  background-color: #ffffff;
+  font-family: "Malgun Gothic", sans-serif;
+  max-width: 1920px;
+  width: 1470px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+.kanban-header-area {
+  margin-bottom: 2rem;
+}
+
+.kanban-header {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #172b4d;
+  margin-left: 80px;
+  margin-bottom: 1.5rem;
+}
+.kanban-toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 25px;
+  gap: 680px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  padding: 10px 15px;
+  border: 2px solid #dfe1e6;
+  border-radius: 6px;
+  width: 350px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #0052cc;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 2px solid #dfe1e6;
+  background-color: #f4f5f7;
+  color: #172b4d;
+  font-size: 1rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-select:focus {
+  border-color: #0052cc;
+  background-color: #ffffff;
+}
+
+.add-card-btn {
+  background-color: #0052cc;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.add-card-btn:hover {
+  background-color: #0747a6;
+}
+
+/* 카드 내 진행률 바 */
+.progress-container {
+  margin-top: 12px;
+  background-color: #e9ecef;
+  border-radius: 10px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background-color: #36b37e; /* 초록색 */
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.board {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  align-items: flex-start;
+  overflow-x: auto;
+}
+
+/* 컬럼 스타일 */
+.column {
+  background-color: #ebecf0;
+  border-radius: 8px;
+  padding: 15px;
+  min-width: 300px;
+  min-height: 500px;
+  transition: background-color 0.2s;
+}
+
+/* 드래그 중인 카드가 컬럼 위로 올라왔을 때 배경색 변경 */
+.column.dragging-over {
+  background-color: #dfe1e6;
+  border: 2px dashed #4c9aff;
+}
+
+.column-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #5e6c84;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  padding-left: 5px;
+}
+
+/* 카드 디자인 */
+.card {
+  background-color: #ffffff;
+  border-radius: 5px;
+  padding: 1rem;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  cursor: grab;
+  border-left: 5px solid #0052cc;
+  color: #172b4d;
+}
+
+.card:hover {
+  background-color: #f4f5f7;
+}
+
+.card:active {
+  cursor: grabbing;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: #172b4d;
+}
+
+.card-deadline {
+  font-size: 12px;
+  background-color: #ffebe6;
+  color: #de350b;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.card-position {
+  font-size: 14px;
+  color: #6b778c;
+  margin: 0;
+}

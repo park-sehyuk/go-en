@@ -37,17 +37,6 @@ public class QaNotesServiceImpl implements QaNotesService{
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<QaNotesDto> getNoteList(Long appId) {
-        Application app = applicationRepository.findById(appId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 기업의 정보를 찾을 수 없습니다."));
-
-        List<QaNotes> noteList = qaNotesRepository.findAllByApplicationId(appId);
-
-        return noteList.stream().map(note -> new QaNotesDto(note)).collect(Collectors.toList());
-    }
-
-    @Override
     public void updateNote(Long qaNoteId, QaNotesUpdateDto dto) {
         QaNotes note = qaNotesRepository.findById(qaNoteId)
                 .orElseThrow(() -> new EntityNotFoundException("지리응답 내용을 찾을 수 없습니다"));

@@ -1,0 +1,78 @@
+/* EditNoteModal.css */
+.edit-note-modal {
+  width: clamp(400px, 60vw, 700px);
+}
+
+.edit-form {
+  padding: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #172b4d;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #172b4d;
+  background-color: #fafbfc;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #0052cc;
+  background-color: #fff;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background-color: #0052cc;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0747a6;
+}
+
+.btn-secondary {
+  background-color: #f0f0f0;
+  color: #172b4d;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e0e0;
+}
