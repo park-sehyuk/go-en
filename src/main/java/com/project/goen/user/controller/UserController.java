@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,10 +31,15 @@ public class UserController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/join")
-    public ResponseEntity<Long> join(@RequestBody @Valid UserJoinDto dto){
-        Long userId = userService.userJoin(dto);
-
-        return ResponseEntity.ok(userId);
+    public ResponseEntity<?> join(@RequestBody @Valid UserJoinDto dto){
+        try {
+            Long userId = userService.userJoin(dto);
+            return ResponseEntity.ok(userId);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).body(Map.of(
+                    "message", e.getMessage()
+            ));
+        }
     }
 
     @PostMapping("/login")
@@ -45,16 +51,32 @@ public class UserController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             HttpSession session = httpServletRequest.getSession(true);
             session.setAttribute("SPRING_SECURITY_CONTEXT",SecurityContextHolder.getContext());
+            String userName = userService.getUserNameByEmail(authentication.getName());
 
             return ResponseEntity.ok().body(Map.of(
                     "message","로그인 성공",
-                    "email",authentication.getName()
+                    "email",authentication.getName(),
+                    "name", userName
             ));
         }catch (Exception e){
             return ResponseEntity.status(401).body(Map.of(
                     "message", "아이디 또는 비밀번호가 틀렸습니다."
             ));
         }
+    }
+
+    @GetMapping("/name")
+    public ResponseEntity<?> getName(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "message", "로그인이 필요합니다."
+            ));
+        }
+
+        String email = authentication.getName();
+        String userName = userService.getUserNameByEmail(email);
+
+        return ResponseEntity.ok(userName);
     }
 
 }

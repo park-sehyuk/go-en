@@ -16,13 +16,17 @@ public class ApplicationCardDto {
     private String companyName;
     private String position;
     private Status status;
-    private Long deadline;
+    private Long priority;
+    private LocalDate deadline;
+    private String url;
 
     public ApplicationCardDto(Application app) {
         this.id = app.getId();
         this.companyName = app.getCompanyName();
         this.position = app.getPosition();
         this.status = app.getStatus();
-        this.deadline = ChronoUnit.DAYS.between(LocalDate.now(), app.getDeadline());
+        this.priority = app.getPriority();
+        this.deadline = app.getDeadline();
+        this.url = app.getUrl();
     }
 }

@@ -42,7 +42,7 @@ public class ApplicationController {
 
     @PatchMapping("/cardStatus/{applicationId}")
     public ResponseEntity updateAppStatus(@PathVariable("applicationId") Long applicationId,
-                                          @RequestParam("status") ApplicationStatusUpdateDto status,
+                                          @RequestBody ApplicationStatusUpdateDto status,
                                           Principal principal){
         applicationService.updateCardStatus(applicationId, status, principal.getName());
 
@@ -51,7 +51,7 @@ public class ApplicationController {
 
     @PatchMapping("/{applicationId}")
     public ResponseEntity updateAppCard(@PathVariable("applicationId") Long applicationId,
-                                        @Valid @RequestParam("applicationUpdateDto")ApplicationUpdateDto applicationUpdateDto,
+                                        @RequestBody ApplicationUpdateDto applicationUpdateDto,
                                         Principal principal){
         applicationService.updateCard(applicationId, applicationUpdateDto, principal.getName());
 
@@ -59,7 +59,7 @@ public class ApplicationController {
     }
 
     @DeleteMapping("/{applicationId}")
-    public ResponseEntity deleteAppCard(@PathVariable("applicatdionId") Long applicationId,
+    public ResponseEntity deleteAppCard(@PathVariable("applicationId") Long applicationId,
                                         Principal principal){
         applicationService.deleteCard(applicationId, principal.getName());
 

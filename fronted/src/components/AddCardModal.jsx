@@ -1,66 +1,108 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import {useNavigate} from "react-router-dom";
 import "./AddCardModal.css";
 
-const AddCardModal = ({ isOpen, onClose, onSave, editingCard = null }) => {
-  const [formData, setFormData] = useState({
-    id: null,
-    company_name: "",
-    position: "",
-    status: "INTERESTED",
-    priority: 3,
-    deadline: "",
-    url: "",
-  });
+const AddCardModal = ({ isOpen, onClose, editingCard = null, onSaved}) => {
+  const navigator = useNavigate();
+  const [companyName, setCompanyName] = useState("");
+  const [position, setPosition] = useState("");
+  const [status, setStatus] = useState("");
+  const [priority, setPriority] = useState();
+  const [deadline, setDeadline] = useState();
+  const [url, setUrl] = useState("");
+
+  const onAddCard = async (e) => {
+    e.preventDefault()
+    try{
+      const res = await fetch("api/application", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          companyName: companyName,
+          position: position,
+          status: status,
+          priority: priority,
+          deadline: deadline,
+          url: url
+        })
+      });
+      if (!res.ok) {
+        let message = "카드추가를 실패했습니다.";
+
+        const data = await res.json().catch(() => ({}));
+        if (data?.message) message = data.message;
+        alert(message);
+        throw new Error(message);
+      }
+      navigator("/")
+    }catch (e){
+      console.error("application save failed: ", e);
+      alert("카드추가를 실패했습니다.");
+      throw e;
+    }
+  }
 
   useEffect(() => {
+    if (!isOpen) return;
+
     if (editingCard) {
-      setFormData({
-        id: editingCard.id,
-        company_name: editingCard.companyName,
-        position: editingCard.position,
-        status: editingCard.status,
-        priority: editingCard.priority || 3,
-        deadline: editingCard.deadline || "",
-        url: editingCard.url || "",
-      });
-    } else {
-      setFormData({
-        id: null,
-        company_name: "",
-        position: "",
-        status: "INTERESTED",
-        priority: 3,
-        deadline: "",
-        url: "",
-      });
+      setCompanyName(editingCard.companyName || "");
+      setPosition(editingCard.position || "");
+      setStatus(editingCard.status || "INTERESTED");
+      setPriority(editingCard.priority);
+      setDeadline(editingCard.deadline);
+      setUrl(editingCard.url || "");
     }
-  }, [editingCard, isOpen]);
+  }, [isOpen, editingCard]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "priority" ? parseInt(value) : value,
-    }));
-  };
+  const updateCard = async (e) => {
+    e.preventDefault()
+    try{
+      const res = await fetch(`/api/application/${editingCard.id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          companyName: companyName,
+          position: position,
+          status: status,
+          priority: priority,
+          deadline: deadline,
+          url: url
+        })
+      });
+      if (!res.ok) {
+        let message = "수정에 실패했습니다.";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.company_name || !formData.position) {
-      alert("회사명과 직무는 필수입니다.");
-      return;
+        const data = await res.json().catch(() => ({}));
+        if (data?.message) message = data.message;
+        alert(message);
+        throw new Error(message);
+      }
+
+      if(onSaved){
+        await onSaved();
+      }else {
+        onClose();
+      }
+    }catch (e){
+      console.error("application update failed: ", e);
+      alert("수정에 실패했습니다.");
+      throw e;
     }
-    onSave(formData);
-    setFormData({
-      id: null,
-      company_name: "",
-      position: "",
-      status: "INTERESTED",
-      priority: 3,
-      deadline: "",
-      url: "",
-    });
-  };
+  }
+
+
+  const handleChangeCompanyName = (e) => setCompanyName(e.target.value);
+  const handleChangePosition = (e) => setPosition(e.target.value);
+  const handleChangeStatus = (e) => setStatus(e.target.value);
+  const handleChangePriority = (e) => setPriority(e.target.value);
+  const handleChangeDeadline = (e) => setDeadline(e.target.value);
+  const handleChangeUrl = (e) => setUrl(e.target.value);
 
   if (!isOpen) return null;
 
@@ -78,15 +120,15 @@ const AddCardModal = ({ isOpen, onClose, onSave, editingCard = null }) => {
             &times;
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="add-card-form">
+        <form onSubmit={editingCard ? updateCard : onAddCard} className="add-card-form">
           <div className="form-grid">
             <div className="form-group">
               <label>회사명 *</label>
               <input
                 type="text"
                 name="company_name"
-                value={formData.company_name}
-                onChange={handleChange}
+                value={companyName}
+                onChange={handleChangeCompanyName}
                 placeholder="예: LINE株式会社"
                 required
               />
@@ -97,8 +139,8 @@ const AddCardModal = ({ isOpen, onClose, onSave, editingCard = null }) => {
               <input
                 type="text"
                 name="position"
-                value={formData.position}
-                onChange={handleChange}
+                value={position}
+                onChange={handleChangePosition}
                 placeholder="예: Web Engineer"
                 required
               />
@@ -108,13 +150,15 @@ const AddCardModal = ({ isOpen, onClose, onSave, editingCard = null }) => {
               <label>진행 상태</label>
               <select
                 name="status"
-                value={formData.status}
-                onChange={handleChange}
+                value={status}
+                onChange={handleChangeStatus}
               >
                 <option value="INTERESTED">검토중 (検討中)</option>
                 <option value="APPLIED">서류제출 (ES提出)</option>
-                <option value="INTERVIEW">면접진행중 (面接中)</option>
-                <option value="PASSED">최종합격 (最終合格)</option>
+                <option value="TEST">적성검사/코테 (適性検査)</option>
+                <option value="INTERVIEW">면접진행 (面접進行)</option>
+                <option value="OFFER">내정 (内定)</option>
+                <option value="REJECTED">불합격 (お祈り)</option>
               </select>
             </div>
 
@@ -125,8 +169,8 @@ const AddCardModal = ({ isOpen, onClose, onSave, editingCard = null }) => {
                 name="priority"
                 min="1"
                 max="5"
-                value={formData.priority}
-                onChange={handleChange}
+                value={priority}
+                onChange={handleChangePriority}
               />
             </div>
 
@@ -135,8 +179,8 @@ const AddCardModal = ({ isOpen, onClose, onSave, editingCard = null }) => {
               <input
                 type="date"
                 name="deadline"
-                value={formData.deadline}
-                onChange={handleChange}
+                value={deadline}
+                onChange={handleChangeDeadline}
               />
             </div>
 
@@ -145,8 +189,8 @@ const AddCardModal = ({ isOpen, onClose, onSave, editingCard = null }) => {
               <input
                 type="url"
                 name="url"
-                value={formData.url}
-                onChange={handleChange}
+                value={url}
+                onChange={handleChangeUrl}
                 placeholder="https://..."
               />
             </div>

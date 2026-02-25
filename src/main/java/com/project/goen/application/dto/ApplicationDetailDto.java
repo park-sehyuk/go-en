@@ -17,6 +17,7 @@ public class ApplicationDetailDto {
     private String companyName;
     private String position;
     private Status status;
+    private String url;
     private List<SelectionStepDto> selectionSteps;
     private List<QaNotesDto> qaNotes;
 
@@ -25,6 +26,7 @@ public class ApplicationDetailDto {
         this.companyName = app.getCompanyName();
         this.position = app.getPosition();
         this.status = app.getStatus();
+        this.url = app.getUrl();
 
         if(app.getSelectionSteps() != null){
             this.selectionSteps = app.getSelectionSteps().stream()

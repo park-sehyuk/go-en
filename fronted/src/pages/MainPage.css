@@ -22,10 +22,9 @@
 }
 .kanban-toolbar {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
-  gap: 680px;
   flex-wrap: wrap;
 }
 
@@ -100,8 +99,8 @@
 }
 
 .board {
+  width: 1420px;
   display: flex;
-  justify-content: center;
   gap: 30px;
   align-items: flex-start;
   overflow-x: auto;

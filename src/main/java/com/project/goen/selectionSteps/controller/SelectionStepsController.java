@@ -34,7 +34,7 @@ public class SelectionStepsController {
         return ResponseEntity.ok(stepId);
     }
 
-    @DeleteMapping("/delete/{stepId")
+    @DeleteMapping("/delete/{stepId}")
     public ResponseEntity deleteStep(@PathVariable("stepId") Long stepId){
         selectionStepsService.deleteStep(stepId);
 

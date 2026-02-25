@@ -1,17 +1,68 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./Header.css";
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  const userName = localStorage.getItem("userName") || "사용자";
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    localStorage.getItem("isLoggedIn") === "true"
+  );
+  const [userName, setUserName] = useState("");
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("userName");
-    navigate("/login");
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+  }, [location.pathname]);
+
+  useEffect(() => {
+    fetchUserName();
+  }, [isLoggedIn]);
+
+  const fetchUserName = async () => {
+    if (!isLoggedIn) return;
+
+    try {
+      const res = await fetch("/api/user/name", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (res.status === 401) {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userName");
+        setIsLoggedIn(false);
+        setUserName("");
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error("failed to load user");
+      }
+      const data = await res.text();
+      setUserName(data);
+      localStorage.setItem("userName", data);
+    } catch (e) {
+      console.error("user info load failed:", e);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/user/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (e) {
+      console.error("logout failed:", e);
+    } finally {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userName");
+      setIsLoggedIn(false);
+      setUserName("");
+      navigate("/");
+    }
   };
 
   return (
@@ -25,9 +76,13 @@ const Header = () => {
       <div className="header-right">
         {isLoggedIn ? (
           <div className="user-info">
-            <span className="user-name">{userName}님</span>
-            <button className="logout-btn" onClick={handleLogout}>
-              로그아웃
+            <button
+              type="button"
+              className="user-name logout-name-btn"
+              onClick={handleLogout}
+              title="클릭하면 로그아웃"
+            >
+              {(userName || "사용자")}님
             </button>
           </div>
         ) : (

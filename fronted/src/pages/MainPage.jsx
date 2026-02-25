@@ -3,41 +3,12 @@ import DetailModal from "../components/DetailModal";
 import AddCardModal from "../components/AddCardModal";
 import "./MainPage.css";
 
-const COLUMNS = ["INTERESTED", "APPLIED", "INTERVIEW", "PASSED"];
+const COLUMNS = ["INTERESTED", "APPLIED","TEST", "INTERVIEW","OFFER","REJECTED"];
 
 const MainPage = () => {
-  const [cards, setCards] = useState([
-    {
-      id: 1,
-      companyName: "네이버",
-      position: "백엔드",
-      status: "APPLIED",
-      priority: 4,
-      deadline: "2024-04-15",
-      url: "https://naver.com",
-      progress: 30,
-    },
-    {
-      id: 2,
-      companyName: "카카오",
-      position: "서버 개발",
-      status: "INTERVIEW",
-      priority: 5,
-      deadline: "2024-04-25",
-      url: "https://kakao.com",
-      progress: 60,
-    },
-    {
-      id: 3,
-      companyName: "삼성전자",
-      position: "SW개발",
-      status: "INTERESTED",
-      priority: 3,
-      deadline: "2024-04-30",
-      url: "https://samsung.com",
-      progress: 0,
-    },
-  ]);
+  const [cards, setCards] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("ALL");
@@ -45,6 +16,45 @@ const MainPage = () => {
   const [dragOverCol, setDragOverCol] = useState(null);
   const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
+
+  const onFormData = async () => {
+    try {
+      const res = await fetch("/api/application", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error("failed to load app");
+      }
+
+      const data = await res.json();
+      setCards(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("app load failed:", e);
+      setCards([]);
+    } finally {
+      setIsLoading(true);
+    }
+  };
+
+  useEffect(() => {
+    onFormData();
+  }, []);
+
+  const formatDeadlineLabel = (deadline) => {
+    if (!deadline) return "마감일 없음";
+
+    const today = new Date();
+    const target = new Date(deadline);
+
+    const diffMs = target.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays > 0) return `D-${diffDays}`;
+    if (diffDays === 0) return "D-Day";
+    return `마감 지남 (${Math.abs(diffDays)}일)`;
+  };
 
   // 검색어와 필터에 따라 필터링된 카드 목록
   const filteredCards = cards.filter((card) => {
@@ -64,58 +74,47 @@ const MainPage = () => {
     setDragOverCol(status);
   };
 
-  const onDrop = (e, newStatus) => {
-    const cardId = parseInt(e.dataTransfer.getData("cardId"));
+  const onUpdateStatus = async (applicationId, newStatus) => {
+    try {
+      const res = await fetch(`/api/application/cardStatus/${applicationId}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) {
+        let message = "상태변경에 실패했습니다.";
+
+        const data = await res.json().catch(() => ({}));
+        if (data?.message) message = data.message;
+        alert(message);
+        throw new Error(message);
+      }
+    } catch (e) {
+      console.error("status save failed: ", e);
+      alert("상태값 변경에 실패했습니다.");
+      throw e;
+    }
+  };
+
+  const onDrop = async (e, newStatus) => {
+    const cardId = parseInt(e.dataTransfer.getData("cardId"), 10);
     setCards((prev) =>
-      prev.map((c) => (c.id === cardId ? { ...c, status: newStatus } : c)),
+        prev.map((c) => (c.id === cardId ? { ...c, status: newStatus } : c)),
     );
     setDragOverCol(null);
-  };
 
-  // 새 카드 추가/수정 함수
-  const handleSaveCard = (formData) => {
-    if (formData.id) {
-      // 기존 카드 수정
-      setCards((prev) =>
-        prev.map((c) =>
-          c.id === formData.id
-            ? {
-                ...c,
-                companyName: formData.company_name,
-                position: formData.position,
-                status: formData.status,
-                priority: formData.priority,
-                deadline: formData.deadline,
-                url: formData.url,
-              }
-            : c,
-        ),
-      );
-    } else {
-      // 새 카드 추가
-      const newCard = {
-        id: Date.now(),
-        companyName: formData.company_name,
-        position: formData.position,
-        status: formData.status,
-        priority: formData.priority,
-        deadline: formData.deadline,
-        url: formData.url,
-        progress: 0,
-      };
-      setCards([...cards, newCard]);
-    }
-    setIsAddCardModalOpen(false);
-    setEditingCard(null);
-  };
-
-  // 카드 삭제 함수
-  const handleDeleteCard = (cardId) => {
-    if (window.confirm("이 카드를 삭제하시겠습니까?")) {
-      setCards((prev) => prev.filter((c) => c.id !== cardId));
-      setSelectedAppId(null);
+    try {
+      await onUpdateStatus(cardId, newStatus);
+    } catch {
+      onFormData();
     }
   };
+
+
 
   // 카드 편집 오픈
   const handleEditCard = (card) => {
@@ -123,6 +122,10 @@ const MainPage = () => {
     setIsAddCardModalOpen(true);
     setSelectedAppId(null);
   };
+
+  if (!isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="kanban-container">
@@ -145,10 +148,12 @@ const MainPage = () => {
               onChange={(e) => setFilter(e.target.value)}
             >
               <option value="ALL">전체 보기</option>
-              <option value="INTERESTED">관심 공고</option>
-              <option value="APPLIED">지원 완료</option>
-              <option value="INTERVIEW">면접 진행</option>
-              <option value="PASSED">최종 합격</option>
+              <option value="INTERESTED">검토중 (検討中)</option>
+              <option value="APPLIED">서류제출 (ES提出)</option>
+              <option value="TEST">적성검사/코테 (適性検査)</option>
+              <option value="INTERVIEW">면접진행 (面접進行)</option>
+              <option value="OFFER">내정 (内定)</option>
+              <option value="REJECTED">불합격 (お祈り)</option>
             </select>
             <button
               className="add-card-btn"
@@ -189,17 +194,9 @@ const MainPage = () => {
                 >
                   <div className="card-header">
                     <p className="card-title">{card?.companyName}</p>
-                    <span className="card-deadline">D-{card.deadline}</span>
+                    <span className="card-deadline">{formatDeadlineLabel(card.deadline)}</span>
                   </div>
                   <p className="card-position">{card.position}</p>
-
-                  {/* 추가 기능: 진행률 바 */}
-                  <div className="progress-container">
-                    <div
-                      className="progress-bar"
-                      style={{ width: `${card.progress}%` }}
-                    ></div>
-                  </div>
                 </div>
               ))}
           </div>
@@ -222,8 +219,12 @@ const MainPage = () => {
           setIsAddCardModalOpen(false);
           setEditingCard(null);
         }}
-        onSave={handleSaveCard}
         editingCard={editingCard}
+        onSaved={async () => {
+          await onFormData();
+          setIsAddCardModalOpen(false);
+          setEditingCard(null);
+        }}
       />
     </div>
   );
