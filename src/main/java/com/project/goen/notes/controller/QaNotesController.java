@@ -29,7 +29,7 @@ public class QaNotesController {
 
     @PatchMapping("/update/{noteId}")
     public ResponseEntity updateNote(@PathVariable("noteId") Long noteId,
-                                     @Valid @RequestParam("qaNotesUpdateDto")QaNotesUpdateDto dto){
+                                     @Valid @RequestBody QaNotesUpdateDto dto){
         qaNotesService.updateNote(noteId, dto);
         return ResponseEntity.ok(noteId);
     }

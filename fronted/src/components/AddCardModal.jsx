@@ -12,9 +12,9 @@ const AddCardModal = ({ isOpen, onClose, editingCard = null, onSaved}) => {
   const [url, setUrl] = useState("");
 
   const onAddCard = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try{
-      const res = await fetch("api/application", {
+      const res = await fetch("/api/application", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -28,19 +28,10 @@ const AddCardModal = ({ isOpen, onClose, editingCard = null, onSaved}) => {
           url: url
         })
       });
-      if (!res.ok) {
-        let message = "카드추가를 실패했습니다.";
-
-        const data = await res.json().catch(() => ({}));
-        if (data?.message) message = data.message;
-        alert(message);
-        throw new Error(message);
-      }
-      navigator("/")
+      await onSaved();
     }catch (e){
       console.error("application save failed: ", e);
       alert("카드추가를 실패했습니다.");
-      throw e;
     }
   }
 
@@ -54,11 +45,18 @@ const AddCardModal = ({ isOpen, onClose, editingCard = null, onSaved}) => {
       setPriority(editingCard.priority);
       setDeadline(editingCard.deadline);
       setUrl(editingCard.url || "");
+    }else {
+      setCompanyName( "");
+      setPosition( "");
+      setStatus( "INTERESTED");
+      setPriority("");
+      setDeadline("");
+      setUrl( "");
     }
   }, [isOpen, editingCard]);
 
   const updateCard = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try{
       const res = await fetch(`/api/application/${editingCard.id}`, {
         method: "PATCH",
@@ -75,14 +73,6 @@ const AddCardModal = ({ isOpen, onClose, editingCard = null, onSaved}) => {
           url: url
         })
       });
-      if (!res.ok) {
-        let message = "수정에 실패했습니다.";
-
-        const data = await res.json().catch(() => ({}));
-        if (data?.message) message = data.message;
-        alert(message);
-        throw new Error(message);
-      }
 
       if(onSaved){
         await onSaved();
@@ -91,8 +81,7 @@ const AddCardModal = ({ isOpen, onClose, editingCard = null, onSaved}) => {
       }
     }catch (e){
       console.error("application update failed: ", e);
-      alert("수정에 실패했습니다.");
-      throw e;
+      alert("수정 실패했습니다.");
     }
   }
 

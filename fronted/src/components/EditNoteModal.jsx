@@ -1,48 +1,83 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./EditNoteModal.css";
 
-const EditNoteModal = ({ isOpen, onClose, onSave, note = null }) => {
-  const [formData, setFormData] = useState({
-    id: null,
-    question: "",
-    answer: "",
-    note_type: "Interview_QA",
-  });
+const EditNoteModal = ({ isOpen,applicationId ,onClose, onSave, note = null }) => {
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [noteType, setNoteType] = useState("");
+
+  const onAddNote = async (e) => {
+    e.preventDefault();
+
+    try{
+      const res = await fetch(`/api/notes/${applicationId}`,{
+        method: "POST",
+        headers:{
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          question:question,
+          answer:answer,
+          noteType: noteType
+        })
+      });
+
+      if(onSave){
+        await onSave();
+      }else {
+        onClose();
+      }
+    }catch (e){
+      console.error("note save failed: ", e);
+      alert("노트 추가를 실패했습니다.");
+    }
+  }
 
   useEffect(() => {
-    if (note) {
-      setFormData({
-        id: note.id,
-        question: note.question,
-        answer: note.answer,
-        note_type: note.note_type,
-      });
-    } else {
-      setFormData({
-        id: null,
-        question: "",
-        answer: "",
-        note_type: "Interview_QA",
-      });
+    if(!isOpen) return;
+
+    if(note){
+      setNoteType(note.type || "COMPANY_ANALYSIS");
+      setQuestion(note.question || "");
+      setAnswer(note.answer || "");
+    }else {
+      setNoteType( "COMPANY_ANALYSIS");
+      setQuestion("");
+      setAnswer("");
     }
-  }, [note, isOpen]);
+  }, [isOpen, note])
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  const onUpdateNote = async (e) => {
     e.preventDefault();
-    if (!formData.question || !formData.answer) {
-      alert("질문과 답변은 필수입니다.");
-      return;
+    try{
+      const res = await fetch(`/api/notes/update/${note.id}`,{
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          question:question,
+          answer:answer,
+          noteType: noteType
+        })
+      });
+
+      if(onSave){
+        await onSave();
+      }else {
+        onClose();
+      }
+
+    }catch (e){
+      console.error("note save failed: ", e);
+      alert("노트 추가를 실패했습니다.");
     }
-    onSave(formData);
-  };
+  }
+
+  const handleChangeQuestion = (e) => setQuestion(e.target.value);
+  const handleChangeAnswer = (e) => setAnswer(e.target.value);
+  const handleChangeNoteType = (e) => setNoteType(e.target.value);
 
   if (!isOpen) return null;
 
@@ -60,19 +95,19 @@ const EditNoteModal = ({ isOpen, onClose, onSave, note = null }) => {
             &times;
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="edit-form">
+        <form onSubmit={note? onUpdateNote : onAddNote} className="edit-form">
           <div className="form-group">
             <label>구분</label>
             <select
               name="note_type"
-              value={formData.note_type}
-              onChange={handleChange}
+              value={noteType}
+              onChange={handleChangeNoteType}
             >
-              <option value="Interview_QA">면접 Q&A</option>
-              <option value="Company_Research">회사 리서치</option>
-              <option value="Personal_PR">자기 PR</option>
-              <option value="Motivation">지망동기</option>
-              <option value="Reverse_Question">역질문</option>
+              <option value="COMPANY_ANALYSIS">기업 분석</option>
+              <option value="INTERVIEW_QA">면접 Q&A</option>
+              <option value="REVERSE_QUESTION">역질문</option>
+              <option value="FEEDBACK">면접 복기</option>
+              <option value="SELF_ANALYSIS">자기 분석</option>
             </select>
           </div>
 
@@ -80,8 +115,8 @@ const EditNoteModal = ({ isOpen, onClose, onSave, note = null }) => {
             <label>질문 (Q) *</label>
             <textarea
               name="question"
-              value={formData.question}
-              onChange={handleChange}
+              value={question}
+              onChange={handleChangeQuestion}
               placeholder="면접 질문을 입력하세요..."
               rows="3"
               required
@@ -92,8 +127,8 @@ const EditNoteModal = ({ isOpen, onClose, onSave, note = null }) => {
             <label>답변 (A) *</label>
             <textarea
               name="answer"
-              value={formData.answer}
-              onChange={handleChange}
+              value={answer}
+              onChange={handleChangeAnswer}
               placeholder="당신의 답변 스크립트를 입력하세요..."
               rows="5"
               required

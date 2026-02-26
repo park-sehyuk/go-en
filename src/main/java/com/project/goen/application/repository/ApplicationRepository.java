@@ -12,8 +12,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     List<Application> findAllByUserId(Long userId);
 
-    List<Application> findAllByUserIdAndStatus(Long userId, Status status);
-
     @EntityGraph(attributePaths = {"selectionSteps","qaNotes"})
     Optional<Application> findById(Long id);
 }

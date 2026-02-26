@@ -7,6 +7,7 @@ import com.project.goen.selectionSteps.dto.SelectionStepDto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,8 @@ public class ApplicationDetailDto {
     private String companyName;
     private String position;
     private Status status;
+    private Long priority;
+    private LocalDate deadline;
     private String url;
     private List<SelectionStepDto> selectionSteps;
     private List<QaNotesDto> qaNotes;
@@ -26,6 +29,8 @@ public class ApplicationDetailDto {
         this.companyName = app.getCompanyName();
         this.position = app.getPosition();
         this.status = app.getStatus();
+        this.priority = app.getPriority();
+        this.deadline = app.getDeadline();
         this.url = app.getUrl();
 
         if(app.getSelectionSteps() != null){

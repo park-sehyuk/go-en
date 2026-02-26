@@ -4,6 +4,7 @@ import com.project.goen.application.entity.Application;
 import com.project.goen.application.repository.ApplicationRepository;
 import com.project.goen.selectionSteps.dto.SelectionStepDto;
 import com.project.goen.selectionSteps.dto.StepAddDto;
+import com.project.goen.selectionSteps.dto.StepIsCompletedUpdateDto;
 import com.project.goen.selectionSteps.dto.StepUpdateDto;
 import com.project.goen.selectionSteps.entity.SelectionSteps;
 import com.project.goen.selectionSteps.repository.SelectionStepsRepository;
@@ -35,6 +36,14 @@ public class SelectionStepsServiceImpl implements SelectionStepsService{
         SelectionSteps stepSave = selectionStepsRepository.save(step);
 
         return stepSave.getId();
+    }
+
+    @Override
+    public void updateIsCompleted(Long stepId, StepIsCompletedUpdateDto dto) {
+        SelectionSteps step = selectionStepsRepository.findById(stepId)
+                .orElseThrow(() -> new EntityNotFoundException("수정할려는 단계 정보가 없습니다."));
+
+        step.updateIsCompleted(dto);
     }
 
     @Override

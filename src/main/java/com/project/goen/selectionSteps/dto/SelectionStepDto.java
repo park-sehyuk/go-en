@@ -13,7 +13,7 @@ public class SelectionStepDto{
     private String stepName;
     private LocalDateTime stepDate;
     private String location;
-    private boolean isCompleted;
+    private Boolean isCompleted;
 
     public SelectionStepDto(SelectionSteps step){
         this.id = step.getId();

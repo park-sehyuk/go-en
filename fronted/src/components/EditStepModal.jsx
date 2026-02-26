@@ -1,51 +1,89 @@
 import React, { useState, useEffect } from "react";
 import "./EditStepModal.css";
 
-const EditStepModal = ({ isOpen, onClose, onSave, step = null }) => {
-  const [formData, setFormData] = useState({
-    id: null,
-    step_name: "",
-    step_date: "",
-    location: "",
-    is_completed: false,
-  });
+const EditStepModal = ({ isOpen,applicationId ,onClose, onSave, step = null }) => {
+  const [stepName, setStepName] = useState("");
+  const [stepDate, setStepDate] = useState("");
+  const [location, setLocation] = useState("");
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  const onAddStep = async (e) => {
+    e.preventDefault();
+
+    try{
+      const res = await fetch(`/api/selection/${applicationId}`,{
+        method: "POST",
+        headers:{
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          stepName:stepName,
+          stepDate:stepDate || null,
+          location:location,
+          isCompleted:isCompleted
+        })
+      });
+
+      if(onSave){
+        await onSave();
+      }else {
+        onClose();
+      }
+    }catch (e){
+      console.error("step save failed: ", e);
+      alert("단계 추가를 실패했습니다.");
+    }
+  }
 
   useEffect(() => {
-    if (step) {
-      setFormData({
-        id: step.id,
-        step_name: step.step_name,
-        step_date: step.step_date,
-        location: step.location,
-        is_completed: step.is_completed,
-      });
-    } else {
-      setFormData({
-        id: null,
-        step_name: "",
-        step_date: "",
-        location: "",
-        is_completed: false,
-      });
+    if(!isOpen) return;
+
+    if(step){
+      setStepName(step.stepName || "");
+      setStepDate(step.stepDate);
+      setLocation(step.location || "");
+      setIsCompleted(step.isCompleted || false);
+    }else {
+      setStepName( "");
+      setStepDate("");
+      setLocation("");
+      setIsCompleted( false);
     }
-  }, [step, isOpen]);
+  }, [isOpen, step])
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
+  const onUpdateStep = async (e) => {
     e.preventDefault();
-    if (!formData.step_name) {
-      alert("단계명은 필수입니다.");
-      return;
+    try{
+      const res = await fetch(`/api/selection/update/${step.id}`,{
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          stepName: stepName,
+          stepDate: stepDate,
+          location: location,
+          isCompleted: isCompleted
+        })
+      });
+
+      if(onSave){
+        await onSave();
+      }else {
+        onClose();
+      }
+
+    }catch (e){
+      console.error("step update failed: ", e);
+      alert("수정 실패했습니다.");
     }
-    onSave(formData);
-  };
+  }
+
+  const handleChangeStepName = (e) => setStepName(e.target.value);
+  const handleChangeStepDate = (e) => setStepDate(e.target.value);
+  const handleChangeLocation = (e) => setLocation(e.target.value);
+  const handleChangeIsCompleted = (e) => setIsCompleted(e.target.checked);
 
   if (!isOpen) return null;
 
@@ -63,14 +101,14 @@ const EditStepModal = ({ isOpen, onClose, onSave, step = null }) => {
             &times;
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="edit-form">
+        <form onSubmit={step ? onUpdateStep : onAddStep} className="edit-form">
           <div className="form-group">
             <label>단계명 *</label>
             <input
               type="text"
               name="step_name"
-              value={formData.step_name}
-              onChange={handleChange}
+              value={stepName}
+              onChange={handleChangeStepName}
               placeholder="예: 1차 면접, 2차 면접"
               required
             />
@@ -81,8 +119,8 @@ const EditStepModal = ({ isOpen, onClose, onSave, step = null }) => {
             <input
               type="datetime-local"
               name="step_date"
-              value={formData.step_date}
-              onChange={handleChange}
+              value={stepDate}
+              onChange={handleChangeStepDate}
             />
           </div>
 
@@ -91,8 +129,8 @@ const EditStepModal = ({ isOpen, onClose, onSave, step = null }) => {
             <input
               type="text"
               name="location"
-              value={formData.location}
-              onChange={handleChange}
+              value={location}
+              onChange={handleChangeLocation}
               placeholder="예: Zoom 링크 또는 회사 주소"
             />
           </div>
@@ -102,8 +140,8 @@ const EditStepModal = ({ isOpen, onClose, onSave, step = null }) => {
               type="checkbox"
               id="is_completed"
               name="is_completed"
-              checked={formData.is_completed}
-              onChange={handleChange}
+              checked={isCompleted}
+              onChange={handleChangeIsCompleted}
             />
             <label htmlFor="is_completed">완료 여부</label>
           </div>

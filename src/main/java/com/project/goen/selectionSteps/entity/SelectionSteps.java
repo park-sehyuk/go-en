@@ -2,6 +2,7 @@ package com.project.goen.selectionSteps.entity;
 
 import com.project.goen.application.entity.Application;
 import com.project.goen.selectionSteps.dto.StepAddDto;
+import com.project.goen.selectionSteps.dto.StepIsCompletedUpdateDto;
 import com.project.goen.selectionSteps.dto.StepUpdateDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -44,6 +45,10 @@ public class SelectionSteps {
         steps.isCompleted = dto.getIsCompleted();
 
         return steps;
+    }
+
+    public void updateIsCompleted(StepIsCompletedUpdateDto dto){
+        this.isCompleted = dto.getIsCompleted();
     }
 
     public void updateStep(StepUpdateDto dto){

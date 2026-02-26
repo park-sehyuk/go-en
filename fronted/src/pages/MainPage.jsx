@@ -16,6 +16,7 @@ const MainPage = () => {
   const [dragOverCol, setDragOverCol] = useState(null);
   const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
+  const selectedCard = cards.find((c) => c.id === selectedAppId);
 
   const onFormData = async () => {
     try {
@@ -23,10 +24,6 @@ const MainPage = () => {
         method: "GET",
         credentials: "include",
       });
-
-      if (!res.ok) {
-        throw new Error("failed to load app");
-      }
 
       const data = await res.json();
       setCards(Array.isArray(data) ? data : []);
@@ -84,19 +81,9 @@ const MainPage = () => {
         },
         body: JSON.stringify({ status: newStatus }),
       });
-
-      if (!res.ok) {
-        let message = "상태변경에 실패했습니다.";
-
-        const data = await res.json().catch(() => ({}));
-        if (data?.message) message = data.message;
-        alert(message);
-        throw new Error(message);
-      }
     } catch (e) {
       console.error("status save failed: ", e);
       alert("상태값 변경에 실패했습니다.");
-      throw e;
     }
   };
 
@@ -114,7 +101,20 @@ const MainPage = () => {
     }
   };
 
-
+  const onDeleteCard = async (applicationId) =>{
+    try {
+      const res = await fetch(`/api/application/${applicationId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      await onFormData();
+    }catch (e){
+      console.error("app delete failed: ", e);
+      alert("삭제를 실패했습니다.");
+    }
+  }
 
   // 카드 편집 오픈
   const handleEditCard = (card) => {
@@ -203,13 +203,13 @@ const MainPage = () => {
         ))}
       </div>
 
-      {selectedAppId && (
+      {selectedCard && (
         <DetailModal
-          appId={selectedAppId}
           onClose={() => setSelectedAppId(null)}
           onEdit={handleEditCard}
-          onDelete={handleDeleteCard}
-          card={cards.find((c) => c.id === selectedAppId)}
+          onDelete={onDeleteCard}
+          card={selectedCard}
+
         />
       )}
 

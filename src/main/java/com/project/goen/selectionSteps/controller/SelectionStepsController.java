@@ -2,6 +2,7 @@ package com.project.goen.selectionSteps.controller;
 
 import com.project.goen.selectionSteps.dto.SelectionStepDto;
 import com.project.goen.selectionSteps.dto.StepAddDto;
+import com.project.goen.selectionSteps.dto.StepIsCompletedUpdateDto;
 import com.project.goen.selectionSteps.dto.StepUpdateDto;
 import com.project.goen.selectionSteps.service.SelectionStepsService;
 import jakarta.validation.Valid;
@@ -18,17 +19,25 @@ public class SelectionStepsController {
     @Autowired
     private SelectionStepsService selectionStepsService;
 
-    @PostMapping("/{appId}")
+    @PostMapping("/{applicationId}")
     public ResponseEntity addStep(@RequestBody @Valid StepAddDto dto,
-                                  @PathVariable("appId") Long appId){
+                                  @PathVariable("applicationId") Long appId){
         Long stepId = selectionStepsService.addStep(dto, appId);
+
+        return ResponseEntity.ok(stepId);
+    }
+
+    @PatchMapping("/isCompleted/{stepId}")
+    public ResponseEntity updateIsCompleted(@PathVariable("stepId") Long stepId,
+                                            @RequestBody StepIsCompletedUpdateDto dto){
+        selectionStepsService.updateIsCompleted(stepId, dto);
 
         return ResponseEntity.ok(stepId);
     }
 
     @PatchMapping("/update/{stepId}")
     public ResponseEntity updateStep(@PathVariable("stepId") Long stepId,
-                                     @Valid @RequestParam("stepUpdateDto")StepUpdateDto dto){
+                                     @Valid @RequestBody StepUpdateDto dto){
         selectionStepsService.updateStep(stepId, dto);
 
         return ResponseEntity.ok(stepId);

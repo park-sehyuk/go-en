@@ -3,127 +3,91 @@ import EditStepModal from "./EditStepModal";
 import EditNoteModal from "./EditNoteModal";
 import "./DetailModal.css";
 
-const DetailModal = ({ appId, onClose, onEdit, onDelete, card }) => {
+const DetailModal = ({ onClose, onEdit, onDelete, card }) => {
   const [detail, setDetail] = useState(null);
   const [editingStep, setEditingStep] = useState(null);
   const [editingNote, setEditingNote] = useState(null);
   const [isEditStepModalOpen, setIsEditStepModalOpen] = useState(false);
   const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (card) {
-      setDetail({
-        id: card.id,
-        companyName: card.companyName,
-        position: card.position,
-        status: card.status,
-        priority: card.priority,
-        deadline: card.deadline,
-        url: card.url,
-        steps: [
-          {
-            id: 1,
-            step_name: "서류전형",
-            step_date: "2024-03-20",
-            location: "온라인",
-            is_completed: true,
-          },
-          {
-            id: 2,
-            step_name: "1차 면접",
-            step_date: "2024-04-05T14:00",
-            location: "Zoom",
-            is_completed: true,
-          },
-          {
-            id: 3,
-            step_name: "2차 면접",
-            step_date: "2024-04-20T10:00",
-            location: "회사 본사",
-            is_completed: false,
-          },
-        ],
-        notes: [
-          {
-            id: 1,
-            question: "회사 비전에 대해 어떻게 생각하시나요?",
-            answer: "일본의 기술 엔지니어링에 기여하고 싶어서...",
-            note_type: "Interview_QA",
-          },
-          {
-            id: 2,
-            question: "가장 어려웠던 프로젝트는?",
-            answer: "팀 코드베이스를 재구축할 때...",
-            note_type: "Interview_QA",
-          },
-        ],
+  const normalizeDetail = (data) => ({
+    ...(data && typeof data === "object" && !Array.isArray(data) ? data : {}),
+    selectionSteps: Array.isArray(data?.selectionSteps) ? data.selectionSteps : [],
+    notes: Array.isArray(data?.notes) ? data.notes : [],
+  });
+
+ const onDetailFormData = async () => {
+   if (!card?.id) return;
+   try{
+     const res = await fetch(`/api/application/detail/${card.id}`,{
+       method: "GET",
+       credentials: "include"
+     });
+
+     const data = await res.json();
+     setDetail(normalizeDetail(data));
+   }catch (e){
+     console.error("detail load failed", e);
+     setDetail(normalizeDetail(null));
+   }
+ }
+
+ useEffect(() => {
+   if (!card?.id) return;
+   onDetailFormData();
+ },[card])
+
+  const onUpdateIsCompleted = async (stepId, nextIsCompleted) => {
+    try {
+      await fetch(`/api/selection/isCompleted/${stepId}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isCompleted: nextIsCompleted }),
       });
-    }
-  }, [card]);
 
-  // 단계 저장 함수
-  const handleSaveStep = (stepData) => {
-    setDetail((prev) => {
-      if (stepData.id) {
-        // 수정
-        return {
-          ...prev,
-          steps: prev.steps.map((s) => (s.id === stepData.id ? stepData : s)),
-        };
-      } else {
-        // 추가
-        return {
-          ...prev,
-          steps: [...prev.steps, { ...stepData, id: Date.now() }],
-        };
-      }
-    });
-    setIsEditStepModalOpen(false);
-    setEditingStep(null);
-  };
-
-  // 단계 삭제 함수
-  const handleDeleteStep = (stepId) => {
-    if (window.confirm("이 면접 단계를 삭제하시겠습니까?")) {
-      setDetail((prev) => ({
-        ...prev,
-        steps: prev.steps.filter((s) => s.id !== stepId),
-      }));
+      await onDetailFormData(); // 저장 후 상세 다시 불러오기
+    } catch (e) {
+      console.error("isCompleted update failed: ", e);
+      alert("체크를 실패했습니다.");
     }
   };
 
-  // 노트 저장 함수
-  const handleSaveNote = (noteData) => {
-    setDetail((prev) => {
-      if (noteData.id) {
-        // 수정
-        return {
-          ...prev,
-          notes: prev.notes.map((n) => (n.id === noteData.id ? noteData : n)),
-        };
-      } else {
-        // 추가
-        return {
-          ...prev,
-          notes: [...prev.notes, { ...noteData, id: Date.now() }],
-        };
-      }
-    });
-    setIsEditNoteModalOpen(false);
-    setEditingNote(null);
-  };
+  const onDeleteStep = async (stepId) => {
+   try{
+     const res = await fetch(`/api/selection/delete/${stepId}`,{
+       method: "DELETE",
+       headers:{
+         "Content-Type": "application/json"
+       }
+     });
+     await onDetailFormData();
+   }catch (e){
+     console.error("step delete failed: ",e);
+     alert("삭제를 실패하였습니다.");
+   }
+  }
 
-  // 노트 삭제 함수
-  const handleDeleteNote = (noteId) => {
-    if (window.confirm("이 면접 노트를 삭제하시겠습니까?")) {
-      setDetail((prev) => ({
-        ...prev,
-        notes: prev.notes.filter((n) => n.id !== noteId),
-      }));
+  const onDeleteNote = async (noteId) => {
+    try{
+      const res = await fetch(`/api/notes/delete/${noteId}`,{
+        method: "DELETE",
+        headers:{
+          "Content-Type": "application/json"
+        }
+      });
+      await onDetailFormData();
+    }catch (e){
+      console.error("step delete failed: ",e);
+      alert("삭제를 실패하였습니다.");
     }
-  };
+  }
 
-  if (!detail) return null;
+
+  if (!card) return null;
+  if (!detail) return <div>자세한 정보가 없습니다.</div>;
 
   return (
     <div
@@ -148,7 +112,7 @@ const DetailModal = ({ appId, onClose, onEdit, onDelete, card }) => {
             </button>
             <button
               className="delete-btn"
-              onClick={() => onDelete && onDelete(card.id)}
+              onClick={() => onDelete && onDelete(detail.id)}
               title="삭제"
             >
               🗑
@@ -165,10 +129,12 @@ const DetailModal = ({ appId, onClose, onEdit, onDelete, card }) => {
               <div className="info-item">
                 <label>진행 상태</label>
                 <span className={`status-badge status-${detail.status}`}>
-                  {detail.status === "INTERESTED" && "검토중"}
-                  {detail.status === "APPLIED" && "서류제출"}
-                  {detail.status === "INTERVIEW" && "면접진행"}
-                  {detail.status === "PASSED" && "최종합격"}
+                  {detail.status === "INTERESTED" && "검토중 (検討中)"}
+                  {detail.status === "APPLIED" && "서류제출 (ES提出)"}
+                  {detail.status === "TEST" && "적성검사/코테 (適性検査)"}
+                  {detail.status === "INTERVIEW" && "면접진행 (面접進行)"}
+                  {detail.status === "OFFER" && "내정 (内定)"}
+                  {detail.status === "REJECTED" && "불합격 (お祈り)"}
                 </span>
               </div>
               <div className="info-item">
@@ -223,20 +189,20 @@ const DetailModal = ({ appId, onClose, onEdit, onDelete, card }) => {
                 </button>
               </div>
               <div className="steps-container">
-                {detail.steps.map((step) => (
+                {(detail.selectionSteps ?? []).map((step) => (
                   <div
                     key={step.id}
-                    className={`step-item ${step.is_completed ? "step-completed" : ""}`}
+                    className={`step-item ${step.isCompleted ? "step-completed" : ""}`}
                   >
                     <input
                       type="checkbox"
-                      checked={step.is_completed}
-                      readOnly
+                      checked={Boolean(step.isCompleted)}
+                      onChange={(e) => onUpdateIsCompleted(step.id, e.target.checked)}
                     />
                     <div className="step-info">
-                      <p className="step-name">{step.step_name}</p>
+                      <p className="step-name">{step.stepName}</p>
                       <p className="step-date">
-                        {new Date(step.step_date).toLocaleString()}
+                        {step.stepDate ? new Date(step.stepDate).toLocaleString() : "일정이 없습니다."}
                       </p>
                       {step.location && (
                         <p className="step-location">📍 {step.location}</p>
@@ -254,7 +220,7 @@ const DetailModal = ({ appId, onClose, onEdit, onDelete, card }) => {
                       </button>
                       <button
                         className="delete-item-btn"
-                        onClick={() => handleDeleteStep(step.id)}
+                        onClick={() => onDeleteStep(step.id)}
                       >
                         🗑
                       </button>
@@ -279,17 +245,17 @@ const DetailModal = ({ appId, onClose, onEdit, onDelete, card }) => {
                 </button>
               </div>
               <div className="notes-container">
-                {detail.notes.map((note) => (
+                {(detail.qaNotes ?? []).map((note) => (
                   <div key={note.id} className="note-item">
                     <div className="note-header">
                       <span
-                        className={`note-type-badge note-${note.note_type}`}
+                        className={`note-type-badge note-${note.type}`}
                       >
-                        {note.note_type === "Interview_QA" && "면접 Q&A"}
-                        {note.note_type === "Company_Research" && "회사 리서치"}
-                        {note.note_type === "Personal_PR" && "자기 PR"}
-                        {note.note_type === "Motivation" && "지망동기"}
-                        {note.note_type === "Reverse_Question" && "역질문"}
+                        {note.type === "COMPANY_ANALYSIS" && "기업 분석"}
+                        {note.type === "INTERVIEW_QA" && "면접 Q&A"}
+                        {note.type === "REVERSE_QUESTION" && "역질문"}
+                        {note.type === "FEEDBACK" && "면접 복기"}
+                        {note.type === "SELF_ANALYSIS" && "자기 분석"}
                       </span>
                       <div className="note-actions">
                         <button
@@ -303,7 +269,7 @@ const DetailModal = ({ appId, onClose, onEdit, onDelete, card }) => {
                         </button>
                         <button
                           className="delete-item-btn"
-                          onClick={() => handleDeleteNote(note.id)}
+                          onClick={() => onDeleteNote(note.id)}
                         >
                           🗑
                         </button>
@@ -320,21 +286,31 @@ const DetailModal = ({ appId, onClose, onEdit, onDelete, card }) => {
 
         <EditStepModal
           isOpen={isEditStepModalOpen}
+          applicationId = {detail.id}
           onClose={() => {
             setIsEditStepModalOpen(false);
             setEditingStep(null);
           }}
-          onSave={handleSaveStep}
+          onSave={async () => {
+            await onDetailFormData();
+            setIsEditStepModalOpen(false);
+            setEditingStep(null);
+          }}
           step={editingStep}
         />
 
         <EditNoteModal
           isOpen={isEditNoteModalOpen}
+          applicationId={detail.id}
           onClose={() => {
             setIsEditNoteModalOpen(false);
             setEditingNote(null);
           }}
-          onSave={handleSaveNote}
+          onSave={async () => {
+            await onDetailFormData();
+            setIsEditNoteModalOpen(false);
+            setEditingNote(null);
+          }}
           note={editingNote}
         />
       </div>
